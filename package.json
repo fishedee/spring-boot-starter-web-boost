@@ -1,0 +1,23 @@
+{
+  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "deploy": "mvn clean && gh-pages -d spring-boot-starter-web-boost -b jitpack",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fishedee/spring-boot-starter-web-boost.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fishedee/spring-boot-starter-web-boost/issues"
+  },
+  "homepage": "https://github.com/fishedee/spring-boot-starter-web-boost#readme",
+  "devDependencies": {
+    "gh-pages": "^3.2.3"
+  }
+}
