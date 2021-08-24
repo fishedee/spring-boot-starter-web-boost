@@ -39,7 +39,7 @@ public class WebBoostExceptionAdvice {
     public WebBoostResponseAdvice.ResponseResult exceptionHandler(Exception e){
         log.error("server exception {}",e);
         LogTimeHandlerInterceptor.setException(e);
-        return new WebBoostResponseAdvice.ResponseResult(HttpStatus.INTERNAL_SERVER_ERROR,500,"服务器内部错误",null);
+        return new WebBoostResponseAdvice.ResponseResult(HttpStatus.INTERNAL_SERVER_ERROR,500,"Internal Server Error",null);
     }
 
     //拦截我们自定义的错误

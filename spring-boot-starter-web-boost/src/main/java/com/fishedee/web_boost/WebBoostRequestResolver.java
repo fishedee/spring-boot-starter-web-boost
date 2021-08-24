@@ -76,6 +76,8 @@ public class WebBoostRequestResolver implements HandlerMethodArgumentResolver {
                     //List类型
                     return null;
                 }else{
+                    //当复杂类型没有传入数据时，我们仍然会给他默认值
+                    //因为像Filter这样的数据，前台经常传入都是个空值
                     Object result = valueType.newInstance();
                     this.check(result);
                     return result;
@@ -131,7 +133,6 @@ public class WebBoostRequestResolver implements HandlerMethodArgumentResolver {
 
     private Object getFromWhole(String jsonString,Type valueType){
         try {
-            log.info("jsonString {}",jsonString.length());
             Object result = objectMapper.readValue(jsonString, objectMapper.getTypeFactory().constructType(valueType));
             this.check(result);
             return result;
