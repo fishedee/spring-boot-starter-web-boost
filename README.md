@@ -1,12 +1,13 @@
-![Release](https://jitpack.io/v/fishedee/spring-boot-starter-jpa-boost.svg)
-(https://jitpack.io/#fishedee/spring-boot-starter-jpa-boost)
+![Release](https://jitpack.io/v/fishedee/spring-boot-starter-web-boost.svg)
+(https://jitpack.io/#fishedee/spring-boot-starter-web-boost)
 
-# jpa_boost
+# web_boost
 
-JPA的Curd存储库，与查询存储库，功能：
+SpringBoost的Web工具库，功能包括有：
 
-* 简单，无配置生成数据存储库
-* 任意查询，支持任意筛选，包括子数据join的查询。
+* 全局返回格式统一，转换为{code:0,msg:'',data:{xxx}}的格式
+* 全局异常捕捉，抛出异常后，自动转换为以上格式
+* 更轻松的输入值处理与校验，GET与POST请求默认使用JSON格式传递，支持多个参数绑定到同一个JSON输入上
 
 ## 安装
 
@@ -20,7 +21,7 @@ JPA的Curd存储库，与查询存储库，功能：
 
 <dependency>
     <groupId>com.github.fishedee</groupId>
-    <artifactId>spring-boot-starter-jpa-boost</artifactId>
+    <artifactId>spring-boot-starter-web-boost</artifactId>
     <version>1.0</version>
 </dependency>
 ```
@@ -29,7 +30,7 @@ JPA的Curd存储库，与查询存储库，功能：
 
 ## 使用
 
-代码在[这里](https://github.com/fishedee/spring-boot-starter-jpa-boost/tree/master/spring-boot-starter-jpa-boost-sample)
+代码在[这里](https://github.com/fishedee/spring-boot-starter-web-boost/tree/master/spring-boot-starter-web-boost-sample)
 
 ```ini
 # 开启jpa-boost
@@ -39,115 +40,177 @@ spring.jpa-boost.enable=true
 初始化配置
 
 ```java
-package com.fishedee.jpa_boost.sample;
+package com.fishedee.web_boost.sample;
 
-import lombok.Getter;
-import lombok.ToString;
+import com.fishedee.web_boost.WebBoostMvcConfig;
+import org.springframework.context.annotation.Configuration;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-
-@Entity
-@ToString
-@Getter
-public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
-    private String name;
-
-    private Long age;
-
-    protected User(){
-
-    }
-
-    public User(String name,Long age){
-        this.name = name;
-        this.age = age;
-    }
-
-    public void setName(String name){
-        this.name = name;
-    }
+@Configuration
+public class WebConfig extends WebBoostMvcConfig {
 }
 ```
 
-定义一个User实体
+配置WebConfig，做输入格式的默认处理
 
 ```java
-package com.fishedee.jpa_boost.sample;
+package com.fishedee.web_boost.sample;
 
-import com.fishedee.jpa_boost.CurdFilterBuilder;
-import com.fishedee.jpa_boost.CurdPageAll;
-import com.fishedee.jpa_boost.CurdRepository;
-import org.springframework.stereotype.Component;
+import com.fishedee.web_boost.WebBoostResponseAdvice;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.List;
-
-@Component
-public class UserRepository extends CurdRepository<User,Long> {
-    public UserRepository(){
-        super("用户");
-    }
-
-    public List<User> getByName(String name){
-        //使用CurdFilterBuilder来做任意查询
-        CurdFilterBuilder builder = new CurdFilterBuilder();
-        builder.like("name","%"+name+"%");
-        return this.findByFilter(builder, new CurdPageAll(),false,false).getData();
-    }
+@RestControllerAdvice(basePackages = "com.fishedee.web_boost.sample")
+public class WebResponseAdvice extends WebBoostResponseAdvice {
 }
 ```
 
-定义一个User实体的存储库，默认就有Curd操作
+配置WebResponseAdvice，做返回格式的默认处理
 
 ```java
-@SpringBootTest
-@DirtiesContext(classMode= DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class CurdTest {
-    @Autowired
-    private UserRepository userRepository;
+package com.fishedee.web_boost.sample;
 
-    @Test
-    public void testGetAll(){
-        List<User> userList = userRepository.getAll();
-        assertEquals(userList.size(),0);
-    }
+import com.fishedee.web_boost.LogTimeHandlerInterceptor;
+import com.fishedee.web_boost.WebBoostExceptionAdvice;
+import com.fishedee.web_boost.WebBoostResponseAdvice;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-    //修改操作的，需要有@Transicational注解
-    @Test
-    @Transactional
-    public void testCurd(){
-        //添加
-        User user = new User("fish",123L);
-        User user2 = new User("cat",456L);
-        userRepository.add(user);
-        userRepository.add(user2);
+@ControllerAdvice
+public class WebExceptionAdvice extends WebBoostExceptionAdvice {
+}
+```
 
-        List<User> userList = userRepository.getAll();
-        assertEquals(userList.size(),2);
+配置WebExceptionAdvice，全局异常处理。这里是支持自定义异常格式处理的，具体可以看Sample
 
-        //查询
-        List<User> iNameList = userRepository.getByName("i");
-        JsonAssertUtil.checkEqualStrict("[{id:1,name:\"fish\",age:123}]",iNameList);
+```java
+@RestController
+@RequestMapping("/user")
+@Validated
+public class UserController {
 
-        //删除
-        userRepository.del(user);
-        List<User> userList2 = userRepository.getAll();
-        assertEquals(userList2.size(),1);
-        assertEquals(userList2.get(0).getName(),"cat");
-
-        //修改
-        user2.setName("mk");
-        List<User> userList3 = userRepository.getAll();
-        assertEquals(userList3.size(),1);
-        assertEquals(userList3.get(0).getName(),"mk");
+    //http://localhost:9090/user/go1
+    @GetMapping("/go1")
+    public String go1(){
+        return "123";
     }
 }
 ```
 
-User实体的Curd测试
+对/user/go1的返回值是{code:0,msg:'',data:"123"}
+
+```java
+package com.fishedee.web_boost.sample.api;
+
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+
+@RestController
+@RequestMapping("/salesOrder")
+@Validated
+public class SalesOrderController {
+
+    //报错，http://localhost:9090/salesOrder/get，缺少参数
+    //正常，http://localhost:9090/salesOrder/get?salesOrderId=123
+    @GetMapping("/get")
+    public String get(@RequestParam int salesOrderId){
+        return "result_"+salesOrderId;
+    }
+
+    //正常，http://localhost:9090/salesOrder/get2，值为0
+    //正常，http://localhost:9090/salesOrder/get2?data=%7B%22salesOrderId%22%3A789%7D，值为789
+    @GetMapping("/get2")
+    public String get2(int salesOrderId){
+        return "result3_"+salesOrderId;
+    }
+
+    //错误，http://localhost:9090/salesOrder/get3，非空
+    //正常，http://localhost:9090/salesOrder/get3?data=%7B%22name%22%3A%22fish%22%2C%22age%22%3A123%2C%22itemList%22%3A%5B%7B%22name%22%3A%22m1%22%2C%22count%22%3A2%7D%5D%7D，值为
+    @GetMapping("/get3")
+    public SalesOrder get6(@NotNull  SalesOrder salesOrder){
+        return salesOrder;
+    }
+}
+```
+
+GET请求，可以指定用@RequestParam来获取参数，或者省略，默认在data参数中传入JSON格式化数据
+
+```java
+package com.fishedee.web_boost.sample.api;
+
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.constraints.NotNull;
+
+@RestController
+@RequestMapping("/salesOrder2")
+@Validated
+public class SalesOrderController2 {
+    @PostMapping("/post")
+    public String post(int salesOrderId){
+        return "result_"+salesOrderId;
+    }
+
+    @PostMapping("/post2")
+    public SalesOrder post2(@NotNull  SalesOrder salesOrder){
+        return salesOrder;
+    }
+}
+```
+
+POST请求，默认就在请求体里面放入JSON格式化数据就可以了
+
+```java
+package com.fishedee.web_boost.sample.api;
+
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/mix")
+@Validated
+public class MixController {
+
+    //salesOrderId来自于param，salesOrder来自于data参数JSON格式化数据
+    @GetMapping("/get")
+    public Map get(@RequestParam int salesOrderId, SalesOrder salesOrder){
+        Map result = new HashMap();
+        result.put("salesOrderId",salesOrderId);
+        result.put("salesOrder",salesOrder);
+        return result;
+    }
+
+    //salesOrderId与salesOrder来自于data参数的JSON格式化数据
+    @GetMapping("/get2")
+    public Map get2(int salesOrderId, SalesOrder salesOrder){
+        Map result = new HashMap();
+        result.put("salesOrderId",salesOrderId);
+        result.put("salesOrder",salesOrder);
+        return result;
+    }
+
+    //salesOrderId与salesOrder来自于POST表单的JSON格式化数据
+    @PostMapping("/post")
+    public Map post(int salesOrderId, SalesOrder salesOrder){
+        Map result = new HashMap();
+        result.put("salesOrderId",salesOrderId);
+        result.put("salesOrder",salesOrder);
+        return result;
+    }
+}
+```
+
+混合请求，直接从Query参数，或者请求体中读取输入参数
+
+
+
