@@ -7,7 +7,8 @@ SpringBoost的Web工具库，功能包括有：
 
 * 全局返回格式统一，转换为{code:0,msg:'',data:{xxx}}的格式
 * 全局异常捕捉，抛出异常后，自动转换为以上格式
-* 更轻松的输入值处理与校验，GET与POST请求默认使用JSON格式传递，支持多个参数绑定到同一个JSON输入上
+* 更轻松的输入值处理，GET与POST请求默认使用JSON格式传递，支持多个参数绑定到同一个JSON输入上
+* 更轻松的输入校验，在数据或者接口上直接写@NotNull，@Min，这些校验注解就可以轻松做输入校验了
 
 ## 安装
 
@@ -33,8 +34,8 @@ SpringBoost的Web工具库，功能包括有：
 代码在[这里](https://github.com/fishedee/spring-boot-starter-web-boost/tree/master/spring-boot-starter-web-boost-sample)
 
 ```ini
-# 开启jpa-boost
-spring.jpa-boost.enable=true
+# 开启web-boost
+spring.web-boost.enable=true
 ```
 
 初始化配置
