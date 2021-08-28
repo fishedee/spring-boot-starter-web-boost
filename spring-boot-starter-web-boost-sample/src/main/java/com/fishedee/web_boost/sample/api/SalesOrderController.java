@@ -39,17 +39,17 @@ public class SalesOrderController {
         return "result4_"+salesOrderId;
     }
 
-    //错误，http://localhost:9090/salesOrder/get5，非空
+    //正常，http://localhost:9090/salesOrder/get5，salesOrderId为0
     //正常，http://localhost:9090/salesOrder/get5?data=%7B%22salesOrderId%22%3A789%7D，值为789
     @GetMapping("/get5")
-    public String get5(@NotNull Integer salesOrderId){
+    public String get5(Integer salesOrderId){
         return "result5_"+salesOrderId;
     }
 
-    //错误，http://localhost:9090/salesOrder/get6，非空
+    //错误，http://localhost:9090/salesOrder/get6，违反SalesOrder里面的约束
     //正常，http://localhost:9090/salesOrder/get6?data=%7B%22name%22%3A%22fish%22%2C%22age%22%3A123%2C%22itemList%22%3A%5B%7B%22name%22%3A%22m1%22%2C%22count%22%3A2%7D%5D%7D，值为
     @GetMapping("/get6")
-    public SalesOrder get6(@NotNull  SalesOrder salesOrder){
+    public SalesOrder get6(SalesOrder salesOrder){
         return salesOrder;
     }
 }

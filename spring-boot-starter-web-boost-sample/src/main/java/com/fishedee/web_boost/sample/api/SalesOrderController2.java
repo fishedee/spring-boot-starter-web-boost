@@ -23,12 +23,12 @@ public class SalesOrderController2 {
     }
 
     @PostMapping("/post5")
-    public String post5(@NotNull Integer salesOrderId){
+    public String post5(Integer salesOrderId){
         return "result5_"+salesOrderId;
     }
 
     @PostMapping("/post6")
-    public SalesOrder post6(@NotNull  SalesOrder salesOrder){
+    public SalesOrder post6(SalesOrder salesOrder){
         return salesOrder;
     }
 

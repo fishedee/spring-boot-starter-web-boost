@@ -66,7 +66,7 @@ public class WebBoostPostJsonRequestTest {
         String str = mockMvc.perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn().getResponse().getContentAsString();
-        assertEquals(str,"{\"code\":0,\"msg\":\"\",\"data\":\"result4_null\"}");
+        assertEquals(str,"{\"code\":0,\"msg\":\"\",\"data\":\"result4_0\"}");
     }
 
     @Test
@@ -89,7 +89,7 @@ public class WebBoostPostJsonRequestTest {
         String str = mockMvc.perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn().getResponse().getContentAsString();
-        assertTrue(str.contains("post5.salesOrderId:must not be null"));
+        assertEquals(str,"{\"code\":0,\"msg\":\"\",\"data\":\"result5_0\"}");
     }
 
     @Test

@@ -11,13 +11,13 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletResponse;
 import java.time.Duration;
 
 @Slf4j
-public class LogTimeHandlerInterceptor extends HandlerInterceptorAdapter {
+public class LogTimeHandlerInterceptor implements HandlerInterceptor {
 
     //全局注入
     @Autowired

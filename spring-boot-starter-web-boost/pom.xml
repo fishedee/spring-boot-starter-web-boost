@@ -4,7 +4,7 @@
 
   <groupId>com.fishedee.web_boost</groupId>
   <artifactId>spring-boot-starter-web-boost</artifactId>
-  <version>1.0</version>
+  <version>1.1</version>
   <packaging>jar</packaging>
 
   <name>spring-boot-starter-web-boost</name>
@@ -18,7 +18,12 @@
     <skipTests>true</skipTests>
   </properties>
 
-
+  <repositories>
+    <repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
+    </repository>
+  </repositories>
 
   <dependencyManagement>
     <dependencies>
@@ -51,6 +56,12 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.github.fishedee</groupId>
+      <artifactId>reflection-boost</artifactId>
+      <version>1.0</version>
     </dependency>
 
     <dependency>

@@ -38,7 +38,7 @@ public class WebBoostTemplateRequestTest {
     public void testTemplateGet()throws  Exception{
 
         MockHttpServletRequestBuilder requestBuilder  = MockMvcRequestBuilders.get("/template/get")
-                .param("data","{\"groupId\":3}")
+                .param("data","{\"id\":3}")
                 .contentType(MediaType.APPLICATION_JSON);
         String str = mockMvc.perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -54,7 +54,7 @@ public class WebBoostTemplateRequestTest {
         String str = mockMvc.perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn().getResponse().getContentAsString();
-        assertEquals(str,"{\"code\":0,\"msg\":\"\",\"data\":\"{groupId=1, id=2, name=fish, age=3}\"}");
+        assertEquals(str,"{\"code\":0,\"msg\":\"\",\"data\":\"User(id=2, name=fish, age=3)\"}");
     }
 
 }

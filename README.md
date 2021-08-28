@@ -8,7 +8,7 @@ SpringBoost的Web工具库，功能包括有：
 * 全局返回格式统一，转换为{code:0,msg:'',data:{xxx}}的格式
 * 全局异常捕捉，抛出异常后，自动转换为以上格式
 * 更轻松的输入值处理，GET与POST请求默认使用JSON格式传递，支持多个参数绑定到同一个JSON输入上
-* 更轻松的输入校验，在数据或者接口上直接写@NotNull，@Min，这些校验注解就可以轻松做输入校验了
+* 更轻松的输入校验，在数据上直接写@NotNull，@Min，这些校验注解就可以轻松做输入校验了。接口上的参数没有传值时，也会自动赋默认值，以尽量避免NullPointerException错误
 
 ## 安装
 
@@ -23,7 +23,7 @@ SpringBoost的Web工具库，功能包括有：
 <dependency>
     <groupId>com.github.fishedee</groupId>
     <artifactId>spring-boot-starter-web-boost</artifactId>
-    <version>1.0</version>
+    <version>1.1</version>
 </dependency>
 ```
 
@@ -128,10 +128,10 @@ public class SalesOrderController {
         return "result3_"+salesOrderId;
     }
 
-    //错误，http://localhost:9090/salesOrder/get3，非空
+    //错误，http://localhost:9090/salesOrder/get3，SalesOrder数据上的校验不通过
     //正常，http://localhost:9090/salesOrder/get3?data=%7B%22name%22%3A%22fish%22%2C%22age%22%3A123%2C%22itemList%22%3A%5B%7B%22name%22%3A%22m1%22%2C%22count%22%3A2%7D%5D%7D，值为
     @GetMapping("/get3")
-    public SalesOrder get6(@NotNull  SalesOrder salesOrder){
+    public SalesOrder get6(SalesOrder salesOrder){
         return salesOrder;
     }
 }
@@ -160,7 +160,7 @@ public class SalesOrderController2 {
     }
 
     @PostMapping("/post2")
-    public SalesOrder post2(@NotNull  SalesOrder salesOrder){
+    public SalesOrder post2(SalesOrder salesOrder){
         return salesOrder;
     }
 }
