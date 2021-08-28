@@ -22,12 +22,16 @@ public class WebBoostMvcConfig implements WebMvcConfigurer {
     @Autowired
     private LogTimeHandlerInterceptor logTimeHandlerInterceptor;
 
+    @Autowired
+    private PreSaveRequestBeanInteceptor preSaveRequestBeanInteceptor;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         if( webBoostProperties.isEnable() == false ) {
             return;
         }
         registry.addInterceptor(logTimeHandlerInterceptor);
+        registry.addInterceptor(preSaveRequestBeanInteceptor);
     }
 
     @Autowired

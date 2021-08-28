@@ -2,6 +2,9 @@ package com.fishedee.web_boost;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fishedee.reflection_boost.GenericActualArgumentExtractor;
+import com.fishedee.reflection_boost.GenericFormalArgumentFiller;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +19,8 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
+import sun.reflect.generics.reflectiveObjects.TypeVariableImpl;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletRequest;
@@ -25,7 +30,9 @@ import javax.validation.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.lang.annotation.Native;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -60,58 +67,59 @@ public class WebBoostRequestResolver implements HandlerMethodArgumentResolver {
         return parameter.hasParameterAnnotation(RequestParam.class) == true;
     }
 
+    private Type extractPrameterType(NativeWebRequest webRequest,MethodParameter parameter){
+        Type genericParameterType = parameter.getGenericParameterType();
+        //普通参数
+        if( genericParameterType instanceof Class) {
+            return genericParameterType;
+        }
+
+        //泛型模板参数
+        Class genericClazz = parameter.getDeclaringClass();
+        Class beanClazz = (Class)webRequest.getAttribute(PreSaveRequestBeanInteceptor.PRESAVE_BEAN_CLASS,0);
+        GenericActualArgumentExtractor extractor = new GenericActualArgumentExtractor(beanClazz,genericClazz);
+        GenericFormalArgumentFiller filler = new GenericFormalArgumentFiller(extractor);
+        return filler.fillType(genericParameterType);
+    }
+
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-        final String jsonString = this.getRequestBody(webRequest);
-        Type genericParameterType = parameter.getGenericParameterType();
-        Class valueType = this.getParameterType(parameter);
-        boolean isBasicValueType = this.basicTypeSet.contains(valueType);
+        String jsonString = this.getRequestBody(webRequest);
+        Type genericParameterType = this.extractPrameterType(webRequest,parameter);
+        Class valueType = this.getParameterType(genericParameterType);
+        //json反序列化
+        Object result = null;
         if( jsonString.isEmpty() ){
-            //空的情况下直接返回
-            if( isBasicValueType == false){
-                if( valueType == List.class ||
-                    valueType == Set.class ||
-                    valueType == Map.class){
-                    //List类型
-                    return null;
-                }else{
-                    //当复杂类型没有传入数据时，我们仍然会给他默认值
-                    //因为像Filter这样的数据，前台经常传入都是个空值
-                    Object result = valueType.newInstance();
-                    this.check(result);
-                    return result;
-                }
-            }else{
-                if( valueType.isPrimitive()){
-                    //原始类型
-                    return newPrimitiveType(valueType);
-                }else{
-                    //box类型
-                    return null;
-                }
-            }
+            jsonString = "{}";
         }
+        boolean isBasicValueType = this.basicTypeSet.contains(valueType);
         if( isBasicValueType ){
             //基础类型
             String key = alwaysGetParameterKey(parameter);
-            return this.getFromKeyBasicType(jsonString,key,valueType);
+            result = this.getFromKeyBasicType(jsonString,key,valueType);
         }else{
             //复合类型
             if( collectionTypeSet.contains(valueType)){
                 //集合类型
                 String key = alwaysGetParameterKey(parameter);
-                return this.getFromKey(jsonString,key,genericParameterType);
+                result = this.getFromKey(jsonString,key,genericParameterType);
             }else{
                 //非集合类型
                 String key = getAnnotationKey(parameter);
                 if( Strings.isNotBlank(key)){
-                    return this.getFromKey(jsonString,key,genericParameterType);
+                    result = this.getFromKey(jsonString,key,genericParameterType);
                 }else{
-                    return this.getFromWhole(jsonString,genericParameterType);
+                    result = this.getFromWhole(jsonString,genericParameterType);
                 }
             }
         }
+        //兜底赋默认值
+        if( result == null ){
+            result = newDefaultTypeValue(valueType);
+            this.check(result);
+        }
+        return result;
     }
 
     @Autowired
@@ -178,19 +186,31 @@ public class WebBoostRequestResolver implements HandlerMethodArgumentResolver {
             throw new WebBoostException(1,"格式错误:"+e.getMessage(),null);
         }
     }
-    private Object newPrimitiveType(Class clazz)throws Exception {
-        if (clazz.equals(int.class) ){
+    private Object newDefaultTypeValue(Class clazz)throws Exception {
+        if (clazz.equals(int.class) ||
+            clazz.equals(Integer.class)){
             return 0;
-        }else if( clazz.equals(long.class)){
+        }else if( clazz.equals(long.class)||
+            clazz.equals(Long.class)){
             return (long)0;
-        }else if ( clazz.equals(short.class)){
+        }else if ( clazz.equals(short.class)||
+            clazz.equals(Short.class)){
             return (short)0;
-        }else if ( clazz.equals(float.class)){
+        }else if ( clazz.equals(float.class)||
+            clazz.equals(Float.class)){
             return (float)0;
-        }else if( clazz.equals(double.class)){
+        }else if( clazz.equals(double.class) ||
+            clazz.equals(Double.class)){
             return (double)0;
-        }else if( clazz.equals(boolean.class)){
+        }else if( clazz.equals(boolean.class)||
+            clazz.equals(Boolean.class)){
             return false;
+        }else if( clazz.equals(List.class)){
+            return new ArrayList<>();
+        }else if( clazz.equals(Set.class)){
+            return new HashSet<>();
+        }else if( clazz.equals(Map.class)){
+            return new HashMap();
         }else{
             return clazz.newInstance();
         }
@@ -272,10 +292,13 @@ public class WebBoostRequestResolver implements HandlerMethodArgumentResolver {
         collectionTypeSet.add(TreeMap.class);
     }
 
-    @SuppressWarnings("rawtypes")
-    private Class getParameterType(MethodParameter parameter) {
-        Class t = parameter.getParameterType();
-        return t;
+    private Class getParameterType(Type type) {
+        if( type instanceof Class){
+            return (Class)type;
+        }else{
+            ParameterizedType t = (ParameterizedType)type;
+            return (Class)t.getRawType();
+        }
     }
 
     private String getRealRequestJson(NativeWebRequest webRequest){
