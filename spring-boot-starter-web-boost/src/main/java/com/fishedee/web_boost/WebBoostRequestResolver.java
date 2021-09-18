@@ -196,6 +196,9 @@ public class WebBoostRequestResolver implements HandlerMethodArgumentResolver {
         }else if ( clazz.equals(short.class)||
             clazz.equals(Short.class)){
             return (short)0;
+        }else if( clazz.equals(byte.class) ||
+            clazz.equals(Byte.class)){
+            return (byte)0;
         }else if ( clazz.equals(float.class)||
             clazz.equals(Float.class)){
             return (float)0;
@@ -228,6 +231,9 @@ public class WebBoostRequestResolver implements HandlerMethodArgumentResolver {
         }else if ( clazz.equals(Short.class)||
             clazz.equals(short.class)){
             return (short)node.asInt();
+        }else if( clazz.equals(byte.class) ||
+            clazz.equals(Byte.class)){
+            return (byte)node.asInt();
         }else if ( clazz.equals(Float.class)||
             clazz.equals(float.class)){
             return (float)node.asDouble();
@@ -273,6 +279,8 @@ public class WebBoostRequestResolver implements HandlerMethodArgumentResolver {
         basicTypeSet.add(long.class);
         basicTypeSet.add(Short.class);
         basicTypeSet.add(short.class);
+        basicTypeSet.add(Byte.class);
+        basicTypeSet.add(byte.class);
         basicTypeSet.add(Float.class);
         basicTypeSet.add(float.class);
         basicTypeSet.add(Double.class);

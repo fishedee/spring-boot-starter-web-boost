@@ -37,13 +37,13 @@ public class UserController {
     //http://localhost:9090/user/go4
     @GetMapping("/go4")
     public User go4(){
-        return new User(1,"fish",12);
+        return new User(1,"fish",(byte)12);
     }
 
     //http://localhost:9090/user/go5
     @GetMapping("/go5")
     public List<User> go5(){
-        return Arrays.asList(new User(1,"fish",12),new User(2,"cat",78));
+        return Arrays.asList(new User(1,"fish",(byte)12),new User(2,"cat",(byte)78));
     }
 
     @GetMapping("/go6")
