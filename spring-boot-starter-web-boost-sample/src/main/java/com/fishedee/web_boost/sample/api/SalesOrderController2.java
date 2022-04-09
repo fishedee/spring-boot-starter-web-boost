@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @RestController
 @RequestMapping("/salesOrder2")
@@ -30,6 +31,12 @@ public class SalesOrderController2 {
     @PostMapping("/post6")
     public SalesOrder post6(SalesOrder salesOrder){
         return salesOrder;
+    }
+
+
+    @GetMapping("getBatch")
+    public String getBatch(List<String> ids){
+        return "DD"+ids.toString();
     }
 
 }
