@@ -2,15 +2,10 @@ package com.fishedee.web_boost;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fishedee.reflection_boost.GenericActualArgumentExtractor;
-import com.fishedee.reflection_boost.GenericFormalArgumentFiller;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.Nullable;
-import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -19,8 +14,6 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
-import sun.reflect.generics.reflectiveObjects.TypeVariableImpl;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletRequest;
@@ -29,10 +22,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.*;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.lang.annotation.Native;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -67,26 +58,15 @@ public class WebBoostRequestResolver implements HandlerMethodArgumentResolver {
         return parameter.hasParameterAnnotation(RequestParam.class) == true;
     }
 
-    private Type extractPrameterType(NativeWebRequest webRequest,MethodParameter parameter){
-        Type genericParameterType = parameter.getGenericParameterType();
-        //普通参数
-        if( genericParameterType instanceof Class) {
-            return genericParameterType;
-        }
-
-        //泛型模板参数
-        Class genericClazz = parameter.getDeclaringClass();
-        Class beanClazz = (Class)webRequest.getAttribute(PreSaveRequestBeanInteceptor.PRESAVE_BEAN_CLASS,0);
-        GenericActualArgumentExtractor extractor = new GenericActualArgumentExtractor(beanClazz,genericClazz);
-        GenericFormalArgumentFiller filler = new GenericFormalArgumentFiller(extractor);
-        return filler.fillType(genericParameterType);
+    private Type extractParameterType(NativeWebRequest webRequest, MethodParameter parameter){
+        return parameter.getGenericParameterType();
     }
 
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
         String jsonString = this.getRequestBody(webRequest);
-        Type genericParameterType = this.extractPrameterType(webRequest,parameter);
+        Type genericParameterType = this.extractParameterType(webRequest,parameter);
         Class valueType = this.getParameterType(genericParameterType);
         //json反序列化
         Object result = null;

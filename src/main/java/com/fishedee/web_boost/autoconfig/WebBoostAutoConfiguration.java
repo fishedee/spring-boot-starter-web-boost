@@ -2,7 +2,6 @@ package com.fishedee.web_boost.autoconfig;
 
 
 import com.fishedee.web_boost.LogTimeHandlerInterceptor;
-import com.fishedee.web_boost.PreSaveRequestBeanInteceptor;
 import com.fishedee.web_boost.WebBoostRequestResolver;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -30,13 +29,6 @@ public class WebBoostAutoConfiguration {
     @ConditionalOnProperty(value = "spring.web-boost.enable", havingValue = "true")
     public LogTimeHandlerInterceptor logTimeHandler() {
         return new LogTimeHandlerInterceptor();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(PreSaveRequestBeanInteceptor.class)
-    @ConditionalOnProperty(value = "spring.web-boost.enable", havingValue = "true")
-    public PreSaveRequestBeanInteceptor preSaveRequestBeanInteceptor() {
-        return new PreSaveRequestBeanInteceptor();
     }
 
     @Bean
