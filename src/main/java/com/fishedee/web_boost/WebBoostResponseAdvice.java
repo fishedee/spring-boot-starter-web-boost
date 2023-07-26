@@ -72,7 +72,7 @@ public class WebBoostResponseAdvice implements ResponseBodyAdvice {
     }
 
     @Override
-    public boolean supports(MethodParameter returnType, Class converterType) {
-        return true;
+    public boolean supports(MethodParameter methodParameter, Class converterType) {
+        return methodParameter.hasMethodAnnotation(NoWebBoostResponse.class) == false;
     }
 }
