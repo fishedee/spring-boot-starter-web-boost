@@ -1,5 +1,6 @@
 package com.fishedee.web_boost.sample.api;
 
+import com.fishedee.web_boost.NoWebBoostResponse;
 import com.fishedee.web_boost.WebBoostException;
 import com.fishedee.web_boost.sample.MyException;
 import org.springframework.stereotype.Controller;
@@ -49,5 +50,11 @@ public class UserController {
     @GetMapping("/go6")
     public void go6(){
         throw  new MyException("go6_e");
+    }
+
+    @GetMapping("/go7")
+    @NoWebBoostResponse
+    public String go7(){
+        return "cck";
     }
 }
