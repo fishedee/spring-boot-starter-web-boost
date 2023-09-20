@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -40,6 +41,13 @@ public class WebBoostExceptionAdvice {
         log.error("server exception {}",e);
         LogTimeHandlerInterceptor.setException(e);
         return new WebBoostResponseAdvice.ResponseResult(HttpStatus.INTERNAL_SERVER_ERROR,500,"Internal Server Error",null);
+    }
+
+    @ExceptionHandler(HttpMessageNotWritableException.class)
+    @ResponseBody
+    public Object exceptionMyHandler(HttpMessageNotWritableException e){
+        log.error("server exception {}",e);
+        return null;
     }
 
     //拦截我们自定义的错误
