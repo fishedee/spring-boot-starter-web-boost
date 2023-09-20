@@ -23,7 +23,7 @@ SpringBoost的Web工具库，功能包括有：
 <dependency>
     <groupId>com.github.fishedee</groupId>
     <artifactId>spring-boot-starter-web-boost</artifactId>
-    <version>1.6</version>
+    <version>1.7</version>
 </dependency>
 ```
 
